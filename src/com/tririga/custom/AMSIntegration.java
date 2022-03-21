@@ -24,13 +24,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 
 public class AMSIntegration
         implements CustomParamBusinessConnectTask {
@@ -100,8 +97,12 @@ public class AMSIntegration
 
                         con.disconnect();
 
+                        // TODO need to add schema validation or at least JSON validation
                         JsonParser parser = new JsonParser();
-                        JsonElement jo = parser.parse(theString);
+                        JsonElement je = parser.parse(theString);
+                        // TODO added here
+                        IntegrationField[] fieldArr = integrationFieldsFromJson(je);
+
                         JsonObject jsonObject = jo.getAsJsonObject();
 
                         JsonElement manufacturerPH = jsonObject.get("manufacturer");
@@ -213,6 +214,48 @@ public class AMSIntegration
 
         }
 
+    }
+
+    public static IntegrationField[] integrationFieldsFromJson(JsonElement je) {
+        IntegrationField[] fieldArr = new IntegrationField[36];
+        int counter = 0;
+
+        if (je.isJsonPrimitive()) {
+            if (je.getAsJsonPrimitive().isBoolean())
+                return "Boolean";
+            if (je.getAsJsonPrimitive().isString())
+                return "String";
+            if (je.getAsJsonPrimitive().isNumber()){
+                return "Number";
+            }
+        }
+
+        if (je.isJsonArray()) {
+            sb = new StringBuilder("array<");
+            for (JsonElement e : je.getAsJsonArray()) {
+                sb.append(printClass(e, ident+ "    "));
+            }
+            sb.append(">");
+            return sb.toString();
+        }
+
+        if (je.isJsonObject()) {
+            sb = new StringBuilder("map<\n");
+            for (Map.Entry<String, JsonElement> e : je.getAsJsonObject().entrySet()) {
+                if (e.getValue().)
+
+                sb.append(ident);
+                sb.append(e.getKey()).append(":");
+                sb.append(printClass(e.getValue(), ident+"   ")); //ITERATION on itself
+                sb.append("\n");
+            }
+            sb.append(ident);
+            sb.append(">");
+            return sb.toString();
+        }
+        return "";
+
+        return fieldArr;
     }
 
     public static String getFieldValue(long specId, String fieldName) {
