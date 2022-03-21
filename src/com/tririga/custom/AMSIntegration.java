@@ -58,151 +58,144 @@ public class AMSIntegration
 
         initialiseTWS(ws, profileId);
 
-        try {
-            try {
-                String antennaManufacturer = getFieldValue(calcHelperId, "triInput1TX");
-                String antennaModel = getFieldValue(calcHelperId, "triInput2TX");
-                if (!antennaManufacturer.isEmpty() && !antennaModel.isEmpty()) {
-                    try {
-                        String urlAms = getFieldValue(ioId, "triURLTX");
-                        String userAms = getFieldValue(ioId, "triPostUserNameParameterTX");
-                        String passwordAms = getFieldValue(ioId, "triPostPasswordParameterTX");
+        try { // try anything and catch TRIRIGA exception
+            String antennaManufacturer = getFieldValue(calcHelperId, "triInput1TX");
+            String antennaModel = getFieldValue(calcHelperId, "triInput2TX");
+            if (!antennaManufacturer.isEmpty() && !antennaModel.isEmpty()) {
+                try {
+                    String urlAms = getFieldValue(ioId, "triURLTX");
+                    String userAms = getFieldValue(ioId, "triPostUserNameParameterTX");
+                    String passwordAms = getFieldValue(ioId, "triPostPasswordParameterTX");
 
-                        if (!urlAms.isEmpty() && !userAms.isEmpty() && !passwordAms.isEmpty()) {
-                            String calcUrl = String.valueOf(urlAms) + "name=" + antennaModel + "&manufacturer=" + antennaManufacturer;
-                            int code = -1;
-                            HttpsURLConnection con = null;
+                    if (!urlAms.isEmpty() && !userAms.isEmpty() && !passwordAms.isEmpty()) {
+                        String calcUrl = String.valueOf(urlAms) + "name=" + antennaModel + "&manufacturer=" + antennaManufacturer;
+                        int code = -1;
+                        HttpsURLConnection con = null;
 
-                            String basicAuthString = userAms + ":" + passwordAms;
-                            String authStringEnc = Base64.getEncoder().encodeToString(basicAuthString.getBytes());
-                            URL url = new URL(calcUrl);
-                            con = (HttpsURLConnection) url.openConnection();
-                            byte[] payload = "Test".toString().getBytes(StandardCharsets.UTF_8);
-                            int postDataLength = payload.length;
+                        String basicAuthString = userAms + ":" + passwordAms;
+                        String authStringEnc = Base64.getEncoder().encodeToString(basicAuthString.getBytes());
+                        URL url = new URL(calcUrl);
+                        con = (HttpsURLConnection) url.openConnection();
+                        byte[] payload = "Test".toString().getBytes(StandardCharsets.UTF_8);
+                        int postDataLength = payload.length;
 
-                            con.setDoOutput(true);
-                            con.setInstanceFollowRedirects(false);
-                            con.setRequestMethod("POST");
-                            con.setRequestProperty("Authorization", "Basic " + authStringEnc);
-                            con.setRequestProperty("Host", "value");
-                            con.setRequestProperty("Content-Type", "application/json");
-                            con.setRequestProperty("charset", "utf-8");
-                            con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
-                            con.setUseCaches(false);
+                        con.setDoOutput(true);
+                        con.setInstanceFollowRedirects(false);
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("Authorization", "Basic " + authStringEnc);
+                        con.setRequestProperty("Host", "value");
+                        con.setRequestProperty("Content-Type", "application/json");
+                        con.setRequestProperty("charset", "utf-8");
+                        con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+                        con.setUseCaches(false);
 
-                            code = con.getResponseCode();
-                            String responseMessage = con.getResponseMessage();
+                        code = con.getResponseCode();
+                        String responseMessage = con.getResponseMessage();
 
-                            con.getInputStream();
-                            StringWriter writer = new StringWriter();
+                        con.getInputStream();
+                        StringWriter writer = new StringWriter();
 
-                            IOUtils.copy(con.getInputStream(), writer, StandardCharsets.UTF_8.toString());
-                            String theString = writer.toString();
+                        IOUtils.copy(con.getInputStream(), writer, StandardCharsets.UTF_8.toString());
+                        String theString = writer.toString();
 
-                            con.disconnect();
+                        con.disconnect();
 
-                            JsonParser parser = new JsonParser();
-                            JsonElement jo = parser.parse(theString);
-                            JsonObject jsonObject = jo.getAsJsonObject();
+                        JsonParser parser = new JsonParser();
+                        JsonElement jo = parser.parse(theString);
+                        JsonObject jsonObject = jo.getAsJsonObject();
 
-                            JsonElement manufacturerPH = jsonObject.get("manufacturer");
-                            JsonObject jsonManPH = manufacturerPH.getAsJsonObject();
-                            JsonElement antennaPH = jsonObject.get("antenna");
-                            JsonObject jsonAntPH = antennaPH.getAsJsonObject();
+                        JsonElement manufacturerPH = jsonObject.get("manufacturer");
+                        JsonObject jsonManPH = manufacturerPH.getAsJsonObject();
+                        JsonElement antennaPH = jsonObject.get("antenna");
+                        JsonObject jsonAntPH = antennaPH.getAsJsonObject();
 
 
-                            String athStatus = jsonString(jsonObject, "athStatus");
-                            String antennaType = jsonString(jsonObject, "antennaType");
-                            String name = jsonString(jsonManPH, "name");
-                            String manId = jsonString(jsonManPH, "manId");
-                            String antennaName = jsonString(jsonAntPH, "antennaName");
-                            String atyId = jsonString(jsonAntPH, "atyId");
-                            String athId = jsonString(jsonObject, "athId");
-                            String ca = jsonString(jsonObject, "ca");
-                            String centerHeight = jsonString(jsonObject, "centerHeight");
-                            String centerWidth = jsonString(jsonObject, "centerWidth");
-                            String commentText = jsonString(jsonObject, "commentText");
-                            String connection = jsonString(jsonObject, "connection");
-                            String diameterDishAntenna = jsonString(jsonObject, "diameterDishAntenna");
-                            String frontSurface = jsonString(jsonObject, "frontSurface");
-                            String frontSurfaceDishAntenna = jsonString(jsonObject, "frontSurfaceDishAntenna");
-                            String frontSurfaceSalesEq = jsonString(jsonObject, "frontSurfaceSalesEq");
-                            String frontSurfaceSales = jsonString(jsonObject, "frontSurfaceSales");
-                            String frontWindLoad = jsonString(jsonObject, "frontWindLoad");
-                            String frontWindSpeed = jsonString(jsonObject, "frontWindSpeed");
-                            String height = jsonString(jsonObject, "height");
-                            String validFrom = jsonString(jsonObject, "validFrom");
-                            String validTill = jsonString(jsonObject, "validTill");
-                            String length = jsonString(jsonObject, "length");
-                            String maxWindLoad = jsonString(jsonObject, "maxWindLoad");
-                            String maxWindSpeed = jsonString(jsonObject, "maxWindSpeed");
-                            String modDate = jsonString(jsonObject, "modDate");
-                            String mounting = jsonString(jsonObject, "mounting");
-                            String portsPos = jsonString(jsonObject, "portsPos");
-                            String salesRelatedName = jsonString(jsonObject, "salesRelatedName");
-                            String version = jsonString(jsonObject, "version");
-                            String weightInclMounting = jsonString(jsonObject, "weightInclMounting");
-                            String weight = jsonString(jsonObject, "weight");
-                            String width = jsonString(jsonObject, "width");
-                            String windLoad = jsonString(jsonObject, "windLoad");
-                            String windSpeed = jsonString(jsonObject, "windSpeed");
+                        String athStatus = jsonString(jsonObject, "athStatus");
+                        String antennaType = jsonString(jsonObject, "antennaType");
+                        String name = jsonString(jsonManPH, "name");
+                        String manId = jsonString(jsonManPH, "manId");
+                        String antennaName = jsonString(jsonAntPH, "antennaName");
+                        String atyId = jsonString(jsonAntPH, "atyId");
+                        String athId = jsonString(jsonObject, "athId");
+                        String ca = jsonString(jsonObject, "ca");
+                        String centerHeight = jsonString(jsonObject, "centerHeight");
+                        String centerWidth = jsonString(jsonObject, "centerWidth");
+                        String commentText = jsonString(jsonObject, "commentText");
+                        String connection = jsonString(jsonObject, "connection");
+                        String diameterDishAntenna = jsonString(jsonObject, "diameterDishAntenna");
+                        String frontSurface = jsonString(jsonObject, "frontSurface");
+                        String frontSurfaceDishAntenna = jsonString(jsonObject, "frontSurfaceDishAntenna");
+                        String frontSurfaceSalesEq = jsonString(jsonObject, "frontSurfaceSalesEq");
+                        String frontSurfaceSales = jsonString(jsonObject, "frontSurfaceSales");
+                        String frontWindLoad = jsonString(jsonObject, "frontWindLoad");
+                        String frontWindSpeed = jsonString(jsonObject, "frontWindSpeed");
+                        String height = jsonString(jsonObject, "height");
+                        String validFrom = jsonString(jsonObject, "validFrom");
+                        String validTill = jsonString(jsonObject, "validTill");
+                        String length = jsonString(jsonObject, "length");
+                        String maxWindLoad = jsonString(jsonObject, "maxWindLoad");
+                        String maxWindSpeed = jsonString(jsonObject, "maxWindSpeed");
+                        String modDate = jsonString(jsonObject, "modDate");
+                        String mounting = jsonString(jsonObject, "mounting");
+                        String portsPos = jsonString(jsonObject, "portsPos");
+                        String salesRelatedName = jsonString(jsonObject, "salesRelatedName");
+                        String version = jsonString(jsonObject, "version");
+                        String weightInclMounting = jsonString(jsonObject, "weightInclMounting");
+                        String weight = jsonString(jsonObject, "weight");
+                        String width = jsonString(jsonObject, "width");
+                        String windLoad = jsonString(jsonObject, "windLoad");
+                        String windSpeed = jsonString(jsonObject, "windSpeed");
 
-                            IntegrationField[] fieldArr = new IntegrationField[36];
+                        IntegrationField[] fieldArr = new IntegrationField[36];
 
-                            fieldArr[0] = new IntegrationField("cstHerstellerTX", name);
-                            fieldArr[1] = new IntegrationField("cstHerstellerIdNU", manId);
-                            fieldArr[2] = new IntegrationField("cstAntennaStatusTX", athStatus);
-                            fieldArr[3] = new IntegrationField("cstAntennaTypTX", antennaType);
-                            fieldArr[4] = new IntegrationField("cstAntennaTypIdNU", atyId);
-                            fieldArr[5] = new IntegrationField("cstAntennaTypVersionIdNU", athId);
-                            fieldArr[6] = new IntegrationField("cstCaNU", ca);
-                            fieldArr[7] = new IntegrationField("cstCenterHeightNU", centerHeight);
-                            fieldArr[8] = new IntegrationField("cstCenterWidthNU", centerWidth);
-                            fieldArr[9] = new IntegrationField("cstCommentTX", commentText);
-                            fieldArr[10] = new IntegrationField("cstConnectionTX", connection);
-                            fieldArr[11] = new IntegrationField("cstDiameterDishAntennaNU", diameterDishAntenna);
-                            fieldArr[12] = new IntegrationField("cstFrontSalesNU", frontSurface);
-                            fieldArr[13] = new IntegrationField("cstFrontSurfaceDishAntennaNU", frontSurfaceDishAntenna);
-                            fieldArr[14] = new IntegrationField("cstFrontSurfaceSalesEqBL", frontSurfaceSalesEq);
-                            fieldArr[15] = new IntegrationField("cstFrontSurfaceSalesNU", frontSurfaceSales);
-                            fieldArr[16] = new IntegrationField("cstFrontWindLoadNU", frontWindLoad);
-                            fieldArr[17] = new IntegrationField("cstFrontWindSpeedNU", frontWindSpeed);
-                            fieldArr[18] = new IntegrationField("cstHeightNU", height);
-                            fieldArr[19] = new IntegrationField("cstHistFromTX", validFrom);
-                            fieldArr[20] = new IntegrationField("cstHistTillTX", validTill);
-                            fieldArr[21] = new IntegrationField("cstlengthNU", length);
-                            fieldArr[22] = new IntegrationField("cstMaxWindLoadNU", maxWindLoad);
-                            fieldArr[23] = new IntegrationField("cstMaxWindSpeedNU", maxWindSpeed);
-                            fieldArr[24] = new IntegrationField("cstModDateTX", modDate);
-                            fieldArr[25] = new IntegrationField("cstMountingTX", mounting);
-                            fieldArr[26] = new IntegrationField("cstPortsPosTX", portsPos);
-                            fieldArr[27] = new IntegrationField("cstSalesRelatedNameTX", salesRelatedName);
-                            fieldArr[28] = new IntegrationField("cstVersionNU", version);
-                            fieldArr[29] = new IntegrationField("cstWeightInclMountingNU", weightInclMounting);
-                            fieldArr[30] = new IntegrationField("cstWeightNU", weight);
-                            fieldArr[31] = new IntegrationField("cstWidthNU", width);
-                            fieldArr[32] = new IntegrationField("cstWindloadNU", windLoad);
-                            fieldArr[33] = new IntegrationField("cstWindSpeedNU", windSpeed);
-                            fieldArr[34] = new IntegrationField("jrsAntennaSpecIdTX", Long.toString(antennaId));
-                            fieldArr[35] = new IntegrationField("cstAntennaNameTX", antennaName);
+                        fieldArr[0] = new IntegrationField("cstHerstellerTX", name);
+                        fieldArr[1] = new IntegrationField("cstHerstellerIdNU", manId);
+                        fieldArr[2] = new IntegrationField("cstAntennaStatusTX", athStatus);
+                        fieldArr[3] = new IntegrationField("cstAntennaTypTX", antennaType);
+                        fieldArr[4] = new IntegrationField("cstAntennaTypIdNU", atyId);
+                        fieldArr[5] = new IntegrationField("cstAntennaTypVersionIdNU", athId);
+                        fieldArr[6] = new IntegrationField("cstCaNU", ca);
+                        fieldArr[7] = new IntegrationField("cstCenterHeightNU", centerHeight);
+                        fieldArr[8] = new IntegrationField("cstCenterWidthNU", centerWidth);
+                        fieldArr[9] = new IntegrationField("cstCommentTX", commentText);
+                        fieldArr[10] = new IntegrationField("cstConnectionTX", connection);
+                        fieldArr[11] = new IntegrationField("cstDiameterDishAntennaNU", diameterDishAntenna);
+                        fieldArr[12] = new IntegrationField("cstFrontSalesNU", frontSurface);
+                        fieldArr[13] = new IntegrationField("cstFrontSurfaceDishAntennaNU", frontSurfaceDishAntenna);
+                        fieldArr[14] = new IntegrationField("cstFrontSurfaceSalesEqBL", frontSurfaceSalesEq);
+                        fieldArr[15] = new IntegrationField("cstFrontSurfaceSalesNU", frontSurfaceSales);
+                        fieldArr[16] = new IntegrationField("cstFrontWindLoadNU", frontWindLoad);
+                        fieldArr[17] = new IntegrationField("cstFrontWindSpeedNU", frontWindSpeed);
+                        fieldArr[18] = new IntegrationField("cstHeightNU", height);
+                        fieldArr[19] = new IntegrationField("cstHistFromTX", validFrom);
+                        fieldArr[20] = new IntegrationField("cstHistTillTX", validTill);
+                        fieldArr[21] = new IntegrationField("cstlengthNU", length);
+                        fieldArr[22] = new IntegrationField("cstMaxWindLoadNU", maxWindLoad);
+                        fieldArr[23] = new IntegrationField("cstMaxWindSpeedNU", maxWindSpeed);
+                        fieldArr[24] = new IntegrationField("cstModDateTX", modDate);
+                        fieldArr[25] = new IntegrationField("cstMountingTX", mounting);
+                        fieldArr[26] = new IntegrationField("cstPortsPosTX", portsPos);
+                        fieldArr[27] = new IntegrationField("cstSalesRelatedNameTX", salesRelatedName);
+                        fieldArr[28] = new IntegrationField("cstVersionNU", version);
+                        fieldArr[29] = new IntegrationField("cstWeightInclMountingNU", weightInclMounting);
+                        fieldArr[30] = new IntegrationField("cstWeightNU", weight);
+                        fieldArr[31] = new IntegrationField("cstWidthNU", width);
+                        fieldArr[32] = new IntegrationField("cstWindloadNU", windLoad);
+                        fieldArr[33] = new IntegrationField("cstWindSpeedNU", windSpeed);
+                        fieldArr[34] = new IntegrationField("jrsAntennaSpecIdTX", Long.toString(antennaId));
+                        fieldArr[35] = new IntegrationField("cstAntennaNameTX", antennaName);
 
-                            long reph = createDTO(fieldArr);
+                        long reph = createDTO(fieldArr);
 
-                        }
-                    } catch (Exception e) {
-                        //////////////////////////
                     }
-                    ;
-
-                } else {
-                    throw new Exception("No values to send");
+                } catch (Exception e) {
+                    //////////////////////////
                 }
+                ;
 
-
-            } catch (Exception e) {
-                //////////////////////////
+            } else {
+                throw new Exception("No values to send");
             }
-            ;
 
 
             task.setExecutionWasSuccessful(success);
