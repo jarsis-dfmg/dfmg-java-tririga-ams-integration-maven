@@ -189,7 +189,10 @@ public class AMSIntegration
 
                     }
                 } catch (Exception e) {
-                    //////////////////////////
+                    logserver.error(e.getMessage());
+                    logserver.error(e);
+                    task.setExecutionWasSuccessful(fail);
+                    return (CustomParamTaskResult) task;
                 }
                 ;
 
